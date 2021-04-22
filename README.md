@@ -1,2 +1,2 @@
-# tutorial6
+# Tutorial6
 Simple Shiny App to calculate speed
