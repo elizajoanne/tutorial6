@@ -1,34 +1,50 @@
-#Body Mass Index (BMI) Calculator Demo
+library(shiny)
 
-ui<-pageWithSidebar(
-    # Application title
-    headerPanel("Body Mass Index (BMI) Calculator"),
+ui <- fluidPage(
+  titlePanel("Speed Calculator"),
+  sidebarLayout(
     sidebarPanel(
-      numericInput('Weight', 'Bodyweight (kg)', 55, min = 40, max = 300, step = 1
-      ),
-      numericInput('Height', 'Height (cm)', 150, min = 80, max = 200, step = 1
-      ),
-      submitButton('Submit')
-    ),
+      numericInput("distance", label = strong("Distance (KM)"), 1600, min = 1, max = 3000000,), 
+      br(),
+      numericInput("time", label = strong("Time (Hour)"), 20, min = 0.01, max = 3000,),
+      br(),
+      actionButton("submit", label = "Submit")),
+    
     mainPanel(
-      h3('Results of BMI Calculation'),
-      h4('You entered Weight (kg)'),
-      verbatimTextOutput("inputValueWeight"),
-      h4('You entered Height (m)'),
-      verbatimTextOutput("inputValueHeight"),
-      h4('Which resulted in BMI of (Weight/Height*Height) :'),
-      verbatimTextOutput("BMICalculation")
-    )
-  )
+                 h3("Your Speed is:"),
+                 h2(textOutput("speed_result")), 
+                 h3("You are:"),
+                 h2(textOutput("indicator_show")),
+      ))
+)
 
-
-BMI <- function(Weight, Height) Weight / (Height/100)^2
-
-server<- function(input, output) {
-    output$inputValueWeight <- renderPrint({input$Weight})
-    output$inputValueHeight <- renderPrint({input$Height/100})
-    output$BMICalculation <- renderPrint({BMI(input$Weight,input$Height)})
-  }
-
+server <- function(input, output) {
+  values <- reactiveValues()
+  observe({
+    input$submit
+    values$speed <- isolate({
+      input$distance/input$time
+    })
+  })
+  
+  output$indicator_show <- renderText({
+    if(input$submit == 0) "" else {
+      if (values$speed < 81){
+        values$indicator_show = "Driving at a safe speed"
+      }
+      else if (values$speed < 121){
+        values$indicator_show ="Driving at a moderate speed. Be safe!"
+      }
+      else{
+        values$indicator_show ="Driving fast. Please SLOW DOWN!"
+      }
+      paste("", values$indicator_show)
+    }
+  })
+  output$speed_result <- renderText({
+    if(input$submit == 0) "" else
+      paste("", values$speed, "km/hr")
+  })
+}
 
 shinyApp(ui = ui, server = server)
